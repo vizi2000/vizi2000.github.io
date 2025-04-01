@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator cen kursu - Xpress Delivery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --xd-black: #000000;
+            --xd-yellow: #FFD100;
+            --xd-white: #FFFFFF;
+            --xd-gray: #F8F9FA;
+            --xd-dark-gray: #343A40;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--xd-gray);
+            color: var(--xd-black);
+        }
+        
+        .calculator-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--xd-white);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .calculator-header .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .calculator-header .arrow {
+            color: var(--xd-yellow);
+        }
+        
+        .calculator-header .subtitle {
+            font-size: 1.2rem;
+            color: var(--xd-dark-gray);
+        }
+        
+        .form-label {
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--xd-black);
+            border-color: var(--xd-black);
+            padding: 0.5rem 2rem;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: #333;
+            border-color: #333;
+        }
+        
+        .btn-outline-secondary {
+            border-color: var(--xd-dark-gray);
+            color: var(--xd-dark-gray);
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: var(--xd-dark-gray);
+            color: var(--xd-white);
+        }
+        
+        .results-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: var(--xd-gray);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .results-container.show {
+            display: block;
+        }
+        
+        .result-item {
+            margin-bottom: 1rem;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: var(--xd-dark-gray);
+        }
+        
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .price-breakdown {
+            font-size: 0.9rem;
+            color: var(--xd-dark-gray);
+            margin-top: 0.5rem;
+        }
+        
+        .map-container {
+            height: 300px;
+            margin-top: 1.5rem;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .address-input-group {
+            position: relative;
+        }
+        
+        .clear-input {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--xd-dark-gray);
+            z-index: 10;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .loading-spinner.show {
+            display: block;
+        }
+        
+        .error-message {
+            display: none;
+            color: #dc3545;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: #f8d7da;
+            border-radius: 5px;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .calculator-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <div class="logo">
+                <span>xpress <span class="arrow">→</span>delivery</span>
+            </div>
+            <div class="subtitle">Kalkulator cen kursu</div>
+        </div>
+        
+        <form id="calculator-form">
+            <div class="mb-3">
+                <label for="pickup-address" class="form-label">Adres odbioru</label>
+                <div class="address-input-group">
+                    <input type="text" class="form-control" id="pickup-address" placeholder="Wprowadź adres odbioru" required>
+                    <span class="clear-input" data-target="pickup-address"><i class="fas fa-times"></i></span>
+                </div>
+                <div class="form-text">Np. Marszałkowska 142, Warszawa</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="delivery-address" class="form-label">Adres dostawy</label>
+                <div class="address-input-group">
+                    <input type="text" class="form-control" id="delivery-address" placeholder="Wprowadź adres dostawy" required>
+                    <span class="clear-input" data-target="delivery-address"><i class="fas fa-times"></i></span>
+                </div>
+                <div class="form-text">Np. Aleje Jerozolimskie 65/79, Warszawa</div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-calculator me-2"></i>Oblicz cenę
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="reset-button">
+                    <i class="fas fa-redo me-2"></i>Wyczyść
+                </button>
+            </div>
+        </form>
+        
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Ładowanie...</span>
+            </div>
+            <p>Obliczanie trasy i ceny...</p>
+        </div>
+        
+        <div class="error-message" id="error-message">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span id="error-text">Nie udało się obliczyć trasy. Sprawdź poprawność adresów i spróbuj ponownie.</span>
+        </div>
+        
+        <div class="results-container" id="results-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="result-item">
+                        <div class="result-label">Odległość:</div>
+                        <div class="result-value" id="distance-result">0 km</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">Cena kursu:</div>
+                        <div class="result-value" id="price-result">0 zł</div>
+                        <div class="price-breakdown" id="price-breakdown"></div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">Szacowany czas dostawy:</div>
+                        <div class="result-value" id="time-result">0 min</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="result-item">
+                        <div class="result-label">Adres odbioru:</div>
+                        <div id="pickup-address-result">-</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">Adres dostawy:</div>
+                        <div id="delivery-address-result">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="map-container" id="map"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config.js"></script>
+    <script src="calculator.js"></script>
+    <script src="maps-integration.js"></script>
+    <script>
+        // Dynamiczne ładowanie Google Maps API z kluczem z konfiguracji
+        document.addEventListener('DOMContentLoaded', function() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsApiKey}&libraries=places&callback=initApp`;
+            script.async = true;
+            script.defer = true;
+            document.body.appendChild(script);
+        });
+    </script>
+</body>
+</html>
